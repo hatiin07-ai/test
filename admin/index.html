@@ -95,6 +95,7 @@
         <button class="tab-btn pb-3 text-sm whitespace-nowrap" data-tab="members">👥 시청자 관리</button>
         <button class="tab-btn pb-3 text-sm whitespace-nowrap" data-tab="types">⚙️ 항목 관리</button>
         <button class="tab-btn pb-3 text-sm whitespace-nowrap" data-tab="seasons">🗂️ 시즌 관리</button>
+        <button class="tab-btn pb-3 text-sm whitespace-nowrap" data-tab="wefgen">🎰 룰렛 연동</button>
         <button class="tab-btn pb-3 text-sm whitespace-nowrap" data-tab="inquiries">
           ✉️ 문의
           <span id="inquiryBadge" class="hidden ml-1 px-1.5 py-0.5 text-[10px] bg-accent text-white rounded-full">0</span>
@@ -320,6 +321,46 @@
         </div>
       </div>
 
+      <!-- ========== 룰렛 연동 (북마클릿 설정) ========== -->
+      <div id="tab-wefgen" class="tab-content">
+        <div class="bg-white rounded-2xl shadow-sm border border-point/20 p-6 mb-6">
+          <h2 class="font-semibold text-txt mb-4">🎰 룰렛 항목 불러오기</h2>
+          <div class="flex flex-col md:flex-row gap-3">
+            <input type="text" id="wgShareUrl" placeholder="https://weflab.com/user/..."
+              class="flex-1 px-4 py-2 rounded-xl border border-point/30 bg-bg focus:outline-none focus:ring-2 focus:ring-accent/30 text-sm">
+            <button onclick="wgLoadItems()"
+              class="px-6 py-2 rounded-xl bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition-colors whitespace-nowrap">불러오기</button>
+          </div>
+          <p id="wgLoadStatus" class="text-sm text-sub mt-2">weflab 룰렛 확률공개 페이지 URL을 입력하고 불러오세요.</p>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-point/20 p-6 mb-6">
+          <h2 class="font-semibold text-txt mb-1">🔗 항목 매핑</h2>
+          <p class="text-xs text-sub mb-4">각 룰렛 항목을 숙제 칩에 연결하세요. <b>제외</b>=기록 안 함(필러), <b>2배 트리거</b>=다음 스핀 2배(1개만), <b>새 항목</b>=이 이름으로 칩 생성.</p>
+          <div id="wgMapTable" class="space-y-1"><p class="text-sub text-sm">공유 URL을 불러오면 항목이 여기 표시됩니다.</p></div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-point/20 p-6 mb-6">
+          <h2 class="font-semibold text-txt mb-4">⚙️ 설정 저장</h2>
+          <label class="block text-sm text-txt mb-1">임포트 시작 idx</label>
+          <input type="number" id="wgStartIdx" value="0"
+            class="w-48 px-4 py-2 rounded-xl border border-point/30 bg-bg focus:outline-none focus:ring-2 focus:ring-accent/30 text-sm">
+          <p class="text-xs text-sub mt-1">0 = 전체. 특정 시점 이후만 가져오려면 그 idx. 현재 커서: <span id="wgCursor" class="font-semibold">-</span></p>
+          <button onclick="wgSaveConfig()"
+            class="mt-4 px-6 py-2 rounded-xl bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition-colors">설정 저장</button>
+          <p id="wgSaveStatus" class="text-sm mt-2"></p>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-point/20 p-6">
+          <h2 class="font-semibold text-txt mb-2">🔖 북마클릿</h2>
+          <p class="text-sm text-sub mb-3">아래 버튼을 <b>북마크바로 드래그</b>해서 등록하세요. weflab 후원관리 페이지에서 클릭하면 룰렛 결과가 자동 기입됩니다. (드래그 안 되면 아래 코드를 복사해 북마크 URL에 붙여넣기)</p>
+          <a id="wgBookmarklet" href="#"
+            class="inline-block px-5 py-2 rounded-xl bg-accent text-white text-sm font-semibold cursor-move">🎰 냔냐 업보 임포트</a>
+          <textarea id="wgBookmarkletCode" rows="3" readonly
+            class="w-full mt-3 text-xs p-2 rounded-lg border border-point/30 bg-bg text-sub font-mono"></textarea>
+        </div>
+      </div>
+
       <!-- ========== 문의 관리 ========== -->
       <div id="tab-inquiries" class="tab-content">
         <div class="bg-white rounded-2xl shadow-sm border border-point/20 p-6">
@@ -414,6 +455,7 @@
   <script src="../js/supabase-config.js"></script>
   <script src="../js/upbo-admin.js"></script>
   <script src="../js/schedule-admin.js"></script>
+  <script src="../js/wef-generator.js"></script>
   <script>
     // 탭 전환 + 스케줄 탭 추가 연동
     document.addEventListener('DOMContentLoaded', () => {
