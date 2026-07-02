@@ -345,7 +345,7 @@
           <label class="block text-sm text-txt mb-1">임포트 시작 idx</label>
           <input type="number" id="wgStartIdx" value="0"
             class="w-48 px-4 py-2 rounded-xl border border-point/30 bg-bg focus:outline-none focus:ring-2 focus:ring-accent/30 text-sm">
-          <p class="text-xs text-sub mt-1">0 = 전체. 특정 시점 이후만 가져오려면 그 idx. 현재 커서: <span id="wgCursor" class="font-semibold">-</span></p>
+          <p class="text-xs text-sub mt-1">기본값 = 현재 커서(여기서부터 이어서). 더 이전부터 다시 가져오려면 낮추세요. 0 = 전체. 현재 커서: <span id="wgCursor" class="font-semibold">-</span></p>
           <button onclick="wgSaveConfig()"
             class="mt-4 px-6 py-2 rounded-xl bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition-colors">설정 저장</button>
           <p id="wgSaveStatus" class="text-sm mt-2"></p>
