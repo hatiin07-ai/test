@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <title>🔐 냔냐 Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            bg: '#F6F8FF', card: '#FFFFFF', point: '#AFC8FF', accent: '#6E8BFF',
+            txt: '#2F3A5F', sub: '#7C86A5', thead: '#E4EDFF',
+            starOn: '#FFD966', starOff: '#D6E2FF',
+            event: '#6E8BFF', eventBg: '#EEF3FF', eventBorder: '#D6E2FF'
+          },
+          fontFamily: { sans: ['Pretendard', 'sans-serif'], poppins: ['Poppins', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .tab-btn { transition: all 0.2s; }
+    .tab-btn.active { color: #6E8BFF; border-bottom: 2px solid #6E8BFF; font-weight: 600; }
+    .tab-btn:not(.active) { color: #7C86A5; border-bottom: 2px solid transparent; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .sch-table { width: 100%; border-collapse: collapse; }
+    .sch-table th { background: #E4EDFF; color: #2F3A5F; font-size: 0.75rem; font-weight: 600; padding: 10px 12px; text-align: left; }
+    .sch-table th:first-child { border-radius: 10px 0 0 10px; }
+    .sch-table th:last-child { border-radius: 0 10px 10px 0; }
+  </style>
+</head>
+<body class="bg-bg min-h-screen font-sans">
+
+  <!-- ==================== LOGIN ==================== -->
+  <div id="loginScreen" class="min-h-screen flex items-center justify-center px-4">
+    <div class="bg-white rounded-2xl shadow-lg p-8 w-full max-w-sm border border-point/20">
+      <h1 class="text-2xl font-bold text-txt text-center mb-1">🔐 Admin</h1>
+      <p class="text-sub text-sm text-center mb-6">냔냐 관리자 페이지</p>
+      <form id="loginForm" class="space-y-4">
+        <div>
+          <label class="block text-sm text-txt mb-1">이메일</label>
+          <input type="email" id="loginEmail" required
+            class="w-full px-4 py-2.5 rounded-xl border border-point/30 bg-bg focus:outline-none focus:ring-2 focus:ring-accent/30 text-sm">
+        </div>
+        <div>
+          <label class="block text-sm text-txt mb-1">비밀번호</label>
+          <input type="password" id="loginPassword" required
+            class="w-full px-4 py-2.5 rounded-xl border border-point/30 bg-bg focus:outline-none focus:ring-2 focus:ring-accent/30 text-sm">
+        </div>
+        <button type="submit"
+          class="w-full py-2.5 rounded-xl bg-accent text-white font-semibold hover:bg-accent/90 transition-colors text-sm">
+          로그인
+        </button>
+      </form>
+      <p id="loginError" class="text-red-400 text-xs text-center mt-3 hidden"></p>
+    </div>
+  </div>
+
+  <!-- ==================== ADMIN ==================== -->
+  <div id="adminScreen" class="hidden">
+
+    <!-- Top Bar -->
+    <header class="sticky top-0 z-50 bg-bg/95 backdrop-blur-sm border-b border-point/20">
+      <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <a href="../" class="text-sub hover:text-accent transition-colors text-sm">←</a>
+          <h1 class="text-lg font-bold text-txt">🔐 냔냐 Admin</h1>
+        </div>
+        <div class="flex items-center gap-2">
+          <span id="currentDate" class="text-sub text-xs"></span>
+          <button onclick="updateDate()"
+            class="px-3 py-1.5 rounded-lg bg-accent text-white text-xs font-semibold hover:bg-accent/90 transition-colors">
+            📅 날짜 갱신
+          </button>
+          <button onclick="handleLogout()"
+            class="px-3 py-1.5 rounded-lg border border-sub/30 text-sub text-xs hover:bg-red-50 hover:text-red-400 hover:border-red-200 transition-colors">
+            로그아웃
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Tab Navigation -->
+    <div class="max-w-5xl mx-auto px-4 pt-4">
+      <div class="flex gap-6 border-b border-point/20 overflow-x-auto">
+        <button class="tab-btn active pb-3 text-sm whitespace-nowrap" data-tab="assign">📝 숙제 배정</button>
+        <button class="tab-btn pb-3 text-sm whitespace-nowrap" data-tab="schedule">📅 일정 관리</button>
+        <button class="tab-btn pb-3 text-sm whitespace-nowrap" data-tab="members">👥 시청자 관리</button>
+        <button class="tab-btn pb-3 text-sm whitespace-nowrap" data-tab="types">⚙️ 항목 관리</button>
+        <button class="tab-btn pb-3 text-sm whitespace-nowrap" data-tab="seasons">🗂️ 시즌 관리</button>
+        <button class="tab-btn pb-3 text-sm whitespace-nowrap" data-tab="inquiries">
+          ✉️ 문의
+          <span id="inquiryBadge" class="hidden ml-1 px-1.5 py-0.5 text-[10px] bg-accent text-white rounded-full">0</span>
+        </button>
+      </div>
+    </div>
+
+    <main class="max-w-5xl mx-auto px-4 py-6">
+
+      <!-- ========== 숙제 배정 ========== -->
+      <div id="tab-assign" class="tab-content active">
+        <div class="bg-white rounded-2xl shadow-sm border border-point/20 p-6 mb-6">
+          <h2 class="font-semibold text-txt mb-4">📋 시청자별 숙제 관리</h2>
+          <div class="flex flex-wrap gap-4 mb-4">
+            <div style="position:relative;">
+              <label class="block text-sm text-txt mb-1">시청자 검색</label>
+              <input type="text" id="memberSearchInput" placeholder="🔍 닉네임 또는 아이디"
+                autocomplete="off"
+                class="w-64 px-4 py-2 rounded-xl border border-point/30 bg-white focus:outline-none focus:ring-2 focus:ring-accent/30 text-sm">
+              <!-- 숨겨진 실제 값 -->
+              <input type="hidden" id="memberSelectHidden">
+              <!-- 드롭 리스트 -->
+              <div id="memberDropList"
+                style="display:none;position:absolute;top:100%;left:0;z-index:99;width:280px;max-height:220px;overflow-y:auto;background:white;border:1.5px solid rgba(175,200,255,0.5);border-radius:14px;box-shadow:0 8px 24px rgba(110,139,255,0.15);margin-top:4px;">
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm text-txt mb-1">시청자 선택</label>
+              <select id="memberSelect"
+                class="w-full md:w-56 px-4 py-2 rounded-xl border border-point/30 bg-bg focus:outline-none focus:ring-2 focus:ring-accent/30 text-sm">
+                <option value="">-- 시청자 선택 --</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm text-txt mb-1">시즌 선택</label>
+              <select id="seasonSelect"
+                class="px-4 py-2 rounded-xl border border-point/30 bg-bg focus:outline-none focus:ring-2 focus:ring-accent/30 text-sm">
+              </select>
+            </div>
+          </div>
+          <div id="taskGrid" class="hidden">
+            <p class="text-sm text-txt font-semibold mb-3">숙제 항목 (체크 + 수량 입력)</p>
+            <div id="taskCheckboxes" class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4"></div>
+            <div class="mt-4 pt-4 border-t border-point/10">
+              <label class="block text-sm text-txt mb-1">전체 메모</label>
+              <input type="text" id="assignMemo" placeholder="예: 4배잭팟, 특이사항 등..."
+                class="w-full px-4 py-2 rounded-xl border border-point/30 bg-bg focus:outline-none focus:ring-2 focus:ring-accent/30 text-sm">
+            </div>
+            <div class="flex gap-2 mt-4">
+              <button onclick="saveTasks()"
+                class="px-6 py-2 rounded-xl bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition-colors">
+                💾 저장
+              </button>
+              <button onclick="deleteAllTasksForMember()"
+                class="px-4 py-2 rounded-xl border border-sub/30 text-sub text-sm hover:bg-red-50 hover:text-red-400 hover:border-red-200 transition-colors">
+                🗑 전체 삭제
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="bg-white rounded-2xl shadow-sm border border-point/20 p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="font-semibold text-txt">📊 전체 숙제 현황</h2>
+            <div id="overviewSeasonTabs" class="flex gap-2 flex-wrap"></div>
+          </div>
+          <div id="overviewList" class="space-y-2 text-sm"></div>
+        </div>
+      </div>
+
+      <!-- ========== 일정 관리 ========== -->
+      <div id="tab-schedule" class="tab-content">
+
+        <!-- 일정 추가 -->
+        <div class="bg-white rounded-2xl shadow-sm border border-point/20 p-6 mb-6">
+          <h2 class="font-semibold text-txt mb-4">➕ 일정 추가</h2>
+          <form id="addScheduleForm" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-txt mb-1">날짜 <span class="text-red-400">*</span></label>
+                <input type="date" id="schDate" required
+                  class="w-full px-4 py-2 rounded-xl border border-point/30 bg-bg focus:outline-none focus:ring-2 focus:ring-accent/30 text-sm">
+              </div>
+              <div>
+                <label class="block text-sm text-txt mb-1">시간</label>
+                <input type="time" id="schTime"
+                  class="w-full px-4 py-2 rounded-xl border border-point/30 bg-bg focus:outline-none focus:ring-2 focus:ring-accent/30 text-sm">
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm text-txt mb-1">제목 <span class="text-red-400">*</span></label>
+              <input type="text" id="schTitle" required placeholder="예: 노래방송, 게임방송, 특별 이벤트"
+                class="w-full px-4 py-2 rounded-xl border border-point/30 bg-bg focus:outline-none focus:ring-2 focus:ring-accent/30 text-sm">
+            </div>
+            <div>
+              <label class="block text-sm text-txt mb-1">설명</label>
+              <input type="text" id="schDesc" placeholder="간단한 설명"
+                class="w-full px-4 py-2 rounded-xl border border-point/30 bg-bg focus:outline-none focus:ring-2 focus:ring-accent/30 text-sm">
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-txt mb-1">태그 <span class="text-sub text-xs">(쉼표로 구분)</span></label>
+                <input type="text" id="schTags" placeholder="예: 노래, 수다, 게임"
+                  class="w-full px-4 py-2 rounded-xl border border-point/30 bg-bg focus:outline-none focus:ring-2 focus:ring-accent/30 text-sm">
+              </div>
+              <div class="flex items-end gap-3">
+                <label class="flex items-center gap-2 cursor-pointer pb-2">
+                  <input type="checkbox" id="schSpecial" class="w-4 h-4 rounded accent-accent">
+                  <span class="text-sm text-txt">🟣 이벤트 표시</span>
+                </label>
+              </div>
+            </div>
+            <button type="submit"
+              class="px-6 py-2.5 rounded-xl bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition-colors">
+              ➕ 일정 추가
+            </button>
+          </form>
+        </div>
+
+        <!-- 일정 목록 -->
+        <div class="bg-white rounded-2xl shadow-sm border border-point/20 p-6">
+          <h2 class="font-semibold text-txt mb-4">📋 등록된 일정</h2>
+          <div class="overflow-x-auto">
+            <table class="sch-table">
+              <thead>
+                <tr>
+                  <th>날짜</th>
+                  <th>시간</th>
+                  <th>제목</th>
+                  <th>설명</th>
+                  <th>태그</th>
+                  <th>관리</th>
+                </tr>
+              </thead>
+              <tbody id="scheduleTableBody">
+                <tr><td colspan="6" class="text-center py-8 text-sub text-sm">불러오는 중...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== 시청자 관리 ========== -->
+      <div id="tab-members" class="tab-content">
+        <div class="bg-white rounded-2xl shadow-sm border border-point/20 p-6 mb-6">
+          <h2 class="font-semibold text-txt mb-4">➕ 시청자 추가</h2>
+          <form id="addMemberForm" class="flex flex-col md:flex-row gap-3">
+            <div class="flex-1">
+              <label class="block text-sm text-txt mb-1">닉네임</label>
+              <input type="text" id="inputNickname" required placeholder="닉네임"
+                class="w-full px-4 py-2 rounded-xl border border-point/30 bg-bg focus:outline-none focus:ring-2 focus:ring-accent/30 text-sm">
+            </div>
+            <div class="flex-1">
+              <label class="block text-sm text-txt mb-1">아이디</label>
+              <input type="text" id="inputUserId" required placeholder="아이디"
+                class="w-full px-4 py-2 rounded-xl border border-point/30 bg-bg focus:outline-none focus:ring-2 focus:ring-accent/30 text-sm">
+            </div>
+            <div class="flex items-end">
+              <button type="submit"
+                class="px-6 py-2 rounded-xl bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition-colors whitespace-nowrap">
+                추가
+              </button>
+            </div>
+          </form>
+        </div>
+        <div class="bg-white rounded-2xl shadow-sm border border-point/20 p-6">
+          <h2 class="font-semibold text-txt mb-4">👥 시청자 목록</h2>
+          <div id="memberTable" class="space-y-2"></div>
+        </div>
+      </div>
+
+      <!-- ========== 항목 관리 ========== -->
+      <div id="tab-types" class="tab-content">
+        <div class="bg-white rounded-2xl shadow-sm border border-point/20 p-6 mb-6">
+          <h2 class="font-semibold text-txt mb-4">➕ 숙제 항목 추가</h2>
+          <form id="addTypeForm" class="flex flex-col md:flex-row gap-3">
+            <div class="flex-1">
+              <label class="block text-sm text-txt mb-1">항목 이름</label>
+              <input type="text" id="inputTypeName" required placeholder="예: 그림 사이드 배너"
+                class="w-full px-4 py-2 rounded-xl border border-point/30 bg-bg focus:outline-none focus:ring-2 focus:ring-accent/30 text-sm">
+            </div>
+            <div>
+              <label class="block text-sm text-txt mb-1">분류</label>
+              <select id="inputTypeCategory"
+                class="px-4 py-2 rounded-xl border border-point/30 bg-bg focus:outline-none focus:ring-2 focus:ring-accent/30 text-sm">
+                <option value="regular">🔵 고정 (룰렛)</option>
+                <option value="event">🟣 이벤트</option>
+              </select>
+            </div>
+            <div class="flex items-end">
+              <button type="submit"
+                class="px-6 py-2 rounded-xl bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition-colors whitespace-nowrap">
+                추가
+              </button>
+            </div>
+          </form>
+        </div>
+        <div class="bg-white rounded-2xl shadow-sm border border-point/20 p-6">
+          <h2 class="font-semibold text-txt mb-4">⚙️ 숙제 항목 목록</h2>
+          <div id="typeTable" class="space-y-2"></div>
+        </div>
+      </div>
+
+
+      <!-- ========== 시즌 관리 ========== -->
+      <div id="tab-seasons" class="tab-content">
+        <div class="bg-white rounded-2xl shadow-sm border border-point/20 p-6 mb-6">
+          <h2 class="font-semibold text-txt mb-4">➕ 시즌 추가</h2>
+          <form id="addSeasonForm" class="flex gap-3 items-end">
+            <div class="flex-1">
+              <label class="block text-sm text-txt mb-1">시즌 이름</label>
+              <input type="text" id="inputSeasonName" required placeholder="예: 5월, 6월 이벤트"
+                class="w-full px-4 py-2 rounded-xl border border-point/30 bg-bg focus:outline-none focus:ring-2 focus:ring-accent/30 text-sm">
+            </div>
+            <button type="submit"
+              class="px-6 py-2 rounded-xl bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition-colors whitespace-nowrap">
+              추가
+            </button>
+          </form>
+        </div>
+        <div class="bg-white rounded-2xl shadow-sm border border-point/20 p-6">
+          <h2 class="font-semibold text-txt mb-4">🗂️ 시즌 목록</h2>
+          <div id="seasonList" class="space-y-2"></div>
+        </div>
+      </div>
+
+      <!-- ========== 문의 관리 ========== -->
+      <div id="tab-inquiries" class="tab-content">
+        <div class="bg-white rounded-2xl shadow-sm border border-point/20 p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="font-semibold text-txt">✉️ 문의 목록</h2>
+            <button onclick="deleteCheckedInquiries()"
+              class="px-3 py-1.5 rounded-lg border border-sub/30 text-sub text-xs hover:bg-red-50 hover:text-red-400 hover:border-red-200 transition-colors">
+              🗑 체크된 항목 삭제
+            </button>
+          </div>
+          <div id="inquiryList" class="space-y-2"></div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- 시청자 수정 모달 -->
+  <div id="editMemberModal" class="hidden fixed inset-0 bg-black/30 z-50 flex items-center justify-center px-4">
+    <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm border border-point/20">
+      <h3 class="font-semibold text-txt mb-4">✏️ 시청자 수정</h3>
+      <form id="editMemberForm" class="space-y-3">
+        <input type="hidden" id="editMemberId">
+        <div>
+          <label class="block text-sm text-txt mb-1">닉네임</label>
+          <input type="text" id="editNickname" required
+            class="w-full px-4 py-2 rounded-xl border border-point/30 bg-bg focus:outline-none focus:ring-2 focus:ring-accent/30 text-sm">
+        </div>
+        <div>
+          <label class="block text-sm text-txt mb-1">아이디</label>
+          <input type="text" id="editUserId" required
+            class="w-full px-4 py-2 rounded-xl border border-point/30 bg-bg focus:outline-none focus:ring-2 focus:ring-accent/30 text-sm">
+        </div>
+        <div class="flex gap-2 pt-2">
+          <button type="submit"
+            class="flex-1 py-2 rounded-xl bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition-colors">저장</button>
+          <button type="button" onclick="closeEditMemberModal()"
+            class="flex-1 py-2 rounded-xl border border-sub/30 text-sub text-sm hover:bg-gray-50 transition-colors">취소</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 일정 수정 모달 -->
+  <div id="scheduleEditModal" class="hidden fixed inset-0 bg-black/30 z-50 flex items-center justify-center px-4">
+    <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md border border-point/20">
+      <h3 class="font-semibold text-txt mb-4">✏️ 일정 수정</h3>
+      <form id="editScheduleForm" class="space-y-3">
+        <input type="hidden" id="editSchId">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-sm text-txt mb-1">날짜</label>
+            <input type="date" id="editSchDate" required
+              class="w-full px-3 py-2 rounded-xl border border-point/30 bg-bg focus:outline-none focus:ring-2 focus:ring-accent/30 text-sm">
+          </div>
+          <div>
+            <label class="block text-sm text-txt mb-1">시간</label>
+            <input type="time" id="editSchTime"
+              class="w-full px-3 py-2 rounded-xl border border-point/30 bg-bg focus:outline-none focus:ring-2 focus:ring-accent/30 text-sm">
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm text-txt mb-1">제목</label>
+          <input type="text" id="editSchTitle" required
+            class="w-full px-3 py-2 rounded-xl border border-point/30 bg-bg focus:outline-none focus:ring-2 focus:ring-accent/30 text-sm">
+        </div>
+        <div>
+          <label class="block text-sm text-txt mb-1">설명</label>
+          <input type="text" id="editSchDesc"
+            class="w-full px-3 py-2 rounded-xl border border-point/30 bg-bg focus:outline-none focus:ring-2 focus:ring-accent/30 text-sm">
+        </div>
+        <div>
+          <label class="block text-sm text-txt mb-1">태그 (쉼표로 구분)</label>
+          <input type="text" id="editSchTags"
+            class="w-full px-3 py-2 rounded-xl border border-point/30 bg-bg focus:outline-none focus:ring-2 focus:ring-accent/30 text-sm">
+        </div>
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" id="editSchSpecial" class="w-4 h-4 rounded accent-accent">
+          <span class="text-sm text-txt">🟣 이벤트 표시</span>
+        </label>
+        <div class="flex gap-2 pt-2">
+          <button type="submit"
+            class="flex-1 py-2 rounded-xl bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition-colors">저장</button>
+          <button type="button" onclick="closeScheduleEditModal()"
+            class="flex-1 py-2 rounded-xl border border-sub/30 text-sub text-sm hover:bg-gray-50 transition-colors">취소</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase-config.js"></script>
+  <script src="../js/upbo-admin.js"></script>
+  <script src="../js/schedule-admin.js"></script>
+  <script>
+    // 탭 전환 + 스케줄 탭 추가 연동
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+      });
+
+      document.getElementById('addScheduleForm').addEventListener('submit', handleAddSchedule);
+      document.getElementById('editScheduleForm').addEventListener('submit', handleEditSchedule);
+    });
+
+    // 어드민 로드 시 스케줄도 함께 로드
+    const _origLoadAdminData = typeof loadAdminData === 'function' ? loadAdminData : null;
+    async function loadAllAdminData() {
+      await loadAdminData();
+      await loadScheduleAdmin();
+    }
+    // 어드민 스크린 진입 시 오버라이드
+    const _origHandleLogin = window.handleLogin;
+  </script>
+</body>
+</html>

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <title>냔냐 — 일정 💙</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: {
+        colors: {
+          bg:'#F6F8FF', card:'#FFFFFF', point:'#AFC8FF', accent:'#6E8BFF',
+          accent2:'#8B6FDD', txt:'#2F3A5F', sub:'#7C86A5', thead:'#E4EDFF'
+        },
+        fontFamily: { sans:['A2z','sans-serif'], poppins:['A2z','sans-serif'] }
+      }}
+    }
+  </script>
+  <style>
+    @font-face { font-family:'A2z'; src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2601-6@1.0/에이투지체-1Thin.woff2') format('woff2'); font-weight:100; font-display:swap; }
+    @font-face { font-family:'A2z'; src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2601-6@1.0/에이투지체-2ExtraLight.woff2') format('woff2'); font-weight:200; font-display:swap; }
+    @font-face { font-family:'A2z'; src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2601-6@1.0/에이투지체-3Light.woff2') format('woff2'); font-weight:300; font-display:swap; }
+    @font-face { font-family:'A2z'; src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2601-6@1.0/에이투지체-4Regular.woff2') format('woff2'); font-weight:400; font-display:swap; }
+    @font-face { font-family:'A2z'; src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2601-6@1.0/에이투지체-5Medium.woff2') format('woff2'); font-weight:500; font-display:swap; }
+    @font-face { font-family:'A2z'; src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2601-6@1.0/에이투지체-6SemiBold.woff2') format('woff2'); font-weight:600; font-display:swap; }
+    @font-face { font-family:'A2z'; src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2601-6@1.0/에이투지체-7Bold.woff2') format('woff2'); font-weight:700; font-display:swap; }
+    @font-face { font-family:'A2z'; src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2601-6@1.0/에이투지체-8ExtraBold.woff2') format('woff2'); font-weight:800; font-display:swap; }
+    @font-face { font-family:'A2z'; src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2601-6@1.0/에이투지체-9Black.woff2') format('woff2'); font-weight:900; font-display:swap; }
+
+    html { scroll-behavior: smooth; }
+    ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #F6F8FF; } ::-webkit-scrollbar-thumb { background: #AFC8FF; border-radius: 3px; }
+
+    .nav-tab { position:relative; padding:12px 24px; font-size:.875rem; font-weight:500; color:#7C86A5; transition:color .25s; text-decoration:none; }
+    .nav-tab::after { content:''; position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:0; height:2px; background:#6E8BFF; border-radius:1px; transition:width .3s; }
+    .nav-tab:hover { color:#6E8BFF; } .nav-tab:hover::after { width:60%; }
+    .nav-tab.active { color:#6E8BFF; } .nav-tab.active::after { width:100%; }
+
+    /* 고정 시간 배너 */
+    .fixed-banner { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+    .fb-item { display:flex; align-items:center; gap:8px; padding:8px 18px; background:white; border:1px solid rgba(175,200,255,.35); border-radius:12px; }
+    .fb-day { font-size:.75rem; font-weight:600; color:#7C86A5; }
+    .fb-time { font-size:.9375rem; font-weight:700; color:#2F3A5F; }
+    .fb-badge { font-size:.6875rem; font-weight:600; padding:2px 9px; border-radius:20px; }
+    .badge-live { background:#E4EDFF; color:#6E8BFF; }
+    .badge-off  { background:#EDE8FF; color:#8B6FDD; }
+
+    /* 달력 */
+    .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+    .cal-header { text-align:center; font-size:.8125rem; font-weight:600; color:#7C86A5; padding:8px 0; }
+    .cal-header:first-child { color:#6E8BFF; } .cal-header:last-child { color:#7BA0D4; }
+    .cal-cell { min-height:88px; background:white; border-radius:12px; border:.5px solid rgba(175,200,255,.15); padding:6px 8px; transition:all .2s; cursor:default; }
+    .cal-cell:hover { border-color:#AFC8FF; box-shadow:0 2px 12px rgba(110,139,255,.1); }
+    .cal-cell.empty { background:transparent; border-color:transparent; } .cal-cell.empty:hover { box-shadow:none; }
+    .cal-cell.today { border-color:#6E8BFF; box-shadow:0 0 0 1px #6E8BFF; }
+    .cal-cell.past { opacity:.45; }
+    .cal-day-num { font-size:.8125rem; font-weight:600; color:#2F3A5F; margin-bottom:4px; }
+    .cal-cell:nth-child(7n+1) .cal-day-num { color:#6E8BFF; }
+    .cal-cell:nth-child(7n) .cal-day-num { color:#7BA0D4; }
+    .cal-event { font-size:.6875rem; padding:3px 6px; border-radius:6px; margin-bottom:2px; color:#fff; font-weight:500; word-break:keep-all; overflow-wrap:break-word; line-height:1.35; cursor:pointer; transition:opacity .2s; }
+    .cal-event:hover { opacity:.82; }
+    .cal-event.highlight { animation:pulse-glow 1.5s ease-in-out infinite; }
+    @keyframes pulse-glow { 0%,100%{box-shadow:0 0 0 0 rgba(110,139,255,.4);transform:scale(1)} 50%{box-shadow:0 0 12px 4px rgba(110,139,255,.4);transform:scale(1.02)} }
+
+    /* 리스트 뷰 */
+    .list-date-group { margin-bottom:14px; }
+    .list-date-group.past { opacity:.42; }
+    .list-date-header { display:flex; align-items:center; gap:10px; margin-bottom:8px; padding:0 4px; }
+    .list-day-num { width:40px; height:40px; border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; background:white; border:.5px solid rgba(175,200,255,.2); font-weight:700; font-size:1rem; color:#2F3A5F; line-height:1; }
+    .list-day-num.today { background:#6E8BFF; color:white; border-color:#6E8BFF; }
+    .list-day-num.sunday { color:#6E8BFF; } .list-day-num.saturday { color:#7BA0D4; }
+    .list-day-num.today.sunday,.list-day-num.today.saturday { color:white; }
+    .list-day-label { font-size:.75rem; font-weight:500; color:#7C86A5; }
+    .list-event-item { display:flex; align-items:center; gap:12px; padding:12px 14px; background:white; border-radius:12px; border:.5px solid rgba(175,200,255,.12); margin-bottom:6px; transition:all .2s; cursor:pointer; }
+    .list-event-item:hover { border-color:#AFC8FF; box-shadow:0 2px 10px rgba(110,139,255,.1); }
+    .list-event-bar { width:3px; height:32px; border-radius:2px; flex-shrink:0; }
+    .list-event-info { flex:1; min-width:0; }
+    .list-event-title { font-size:.9375rem; font-weight:600; color:#2F3A5F; }
+    .list-event-time { font-size:.75rem; color:#7C86A5; margin-top:1px; }
+    .list-event-badge { font-size:.6875rem; padding:3px 10px; border-radius:999px; font-weight:500; flex-shrink:0; }
+
+    .today-divider { display:flex; align-items:center; gap:10px; margin:18px 0 12px; padding:0 4px; }
+    .today-divider::before,.today-divider::after { content:''; flex:1; height:1px; background:linear-gradient(90deg,transparent,#6E8BFF,transparent); }
+    .today-divider span { font-size:.75rem; font-weight:700; color:#6E8BFF; white-space:nowrap; letter-spacing:1px; }
+
+    .legend-dot { width:10px; height:10px; border-radius:3px; flex-shrink:0; }
+
+    /* modal */
+    .modal-backdrop { position:fixed; inset:0; z-index:100; background:rgba(0,0,0,.3); display:none; align-items:center; justify-content:center; backdrop-filter:blur(4px); }
+    .modal-backdrop.open { display:flex; }
+    .modal-content { background:#F6F8FF; border-radius:20px; padding:28px; max-width:400px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,.15); }
+
+    .desktop-only { display:block; } .mobile-only { display:none; }
+    @media(max-width:768px) {
+      .desktop-only { display:none; } .mobile-only { display:block; }
+      .nav-tab { padding:10px 16px; font-size:.8125rem; }
+      /* 모바일 달력 — 셀 폭 고정, 칩 넘침 방지 */
+      .cal-grid { gap:2px; }
+      .cal-cell { min-height:54px; padding:3px 2px; overflow:hidden; }
+      .cal-header { font-size:.6875rem; padding:5px 0; }
+      .cal-day-num { font-size:.6875rem; margin-bottom:2px; }
+      .cal-event {
+        font-size:.5rem; padding:2px 3px; line-height:1.2;
+        white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+        word-break:normal;
+      }
+    }
+  </style>
+</head>
+<body class="bg-bg min-h-screen font-sans">
+
+  <nav class="sticky top-0 z-50 bg-bg/95 backdrop-blur-sm border-b border-point/20">
+    <div class="max-w-4xl mx-auto flex items-center justify-center">
+      <a href="/" class="nav-tab">프로필</a>
+      <a href="/schedule/" class="nav-tab active">일정</a>
+      <a href="/upbo/" class="nav-tab">업보책</a>
+      <a href="https://www.songstudio.live/songbook/platform/@%EB%83%94%EB%83%90_" target="_blank" rel="noopener" class="nav-tab">노래책</a>
+      <a href="https://weflab.com/user/lOPU2sualmZsZw" target="_blank" rel="noopener" class="nav-tab">룰렛확률</a>
+    </div>
+  </nav>
+
+  <main class="max-w-4xl mx-auto px-4 pb-16">
+
+    <!-- 고정 방송 시간 -->
+    <section class="pt-8 pb-4">
+      <div class="fixed-banner mb-6">
+        <div class="fb-item">
+          <span class="fb-day">평일</span>
+          <span class="fb-time">19:00</span>
+          <span class="fb-badge badge-live">LIVE</span>
+        </div>
+        <div class="fb-item">
+          <span class="fb-day">주말</span>
+          <span class="fb-time">14:00</span>
+          <span class="fb-badge badge-live">LIVE</span>
+        </div>
+        <div class="fb-item">
+          <span class="fb-day">월 · 목요일</span>
+          <span class="fb-time">휴방 🌙</span>
+          <span class="fb-badge badge-off">OFF</span>
+        </div>
+      </div>
+
+      <!-- 월 네비게이션 -->
+      <div class="flex items-center justify-between mb-5">
+        <button onclick="changeMonth(-1)" class="w-10 h-10 rounded-full bg-white border border-point/20 flex items-center justify-center text-accent hover:bg-thead transition">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <h2 id="calMonth" class="text-xl md:text-2xl font-bold text-txt font-poppins"></h2>
+        <button onclick="changeMonth(1)" class="w-10 h-10 rounded-full bg-white border border-point/20 flex items-center justify-center text-accent hover:bg-thead transition">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+
+      <!-- 범례 (데스크탑) -->
+      <div class="flex flex-wrap items-center justify-center gap-4 mb-4 desktop-only">
+        <div class="flex items-center gap-2"><div class="legend-dot" style="background:#6E8BFF"></div><span class="text-xs text-sub">방송</span></div>
+        <div class="flex items-center gap-2"><div class="legend-dot" style="background:#8B6FDD"></div><span class="text-xs text-sub">이벤트</span></div>
+        <div class="flex items-center gap-2"><div class="legend-dot" style="background:#7C86A5"></div><span class="text-xs text-sub">휴방</span></div>
+        <div class="flex items-center gap-2"><div class="legend-dot" style="background:#48BB78"></div><span class="text-xs text-sub">합방</span></div>
+        <div class="flex items-center gap-2"><div class="legend-dot" style="background:#ED8936"></div><span class="text-xs text-sub">기타</span></div>
+      </div>
+    </section>
+
+    <!-- 달력 (데스크탑+모바일) -->
+    <div class="mb-8">
+      <div class="cal-grid mb-1">
+        <div class="cal-header">일</div><div class="cal-header">월</div><div class="cal-header">화</div>
+        <div class="cal-header">수</div><div class="cal-header">목</div><div class="cal-header">금</div><div class="cal-header">토</div>
+      </div>
+      <div id="calBody" class="cal-grid"></div>
+    </div>
+
+    <!-- 다가오는 일정 (데스크탑+모바일) -->
+    <div class="mb-8">
+      <h3 class="text-sm font-semibold text-sub uppercase tracking-widest mb-3">Upcoming</h3>
+      <div id="upcomingList" class="space-y-2"></div>
+    </div>
+
+  </main>
+
+  <!-- 이벤트 모달 -->
+  <div id="eventModal" class="modal-backdrop" onclick="closeModal(event)">
+    <div class="modal-content">
+      <div class="flex items-start justify-between mb-4">
+        <div>
+          <div id="modalColor" class="w-3 h-3 rounded-full inline-block mr-2" style="vertical-align:middle"></div>
+          <span id="modalType" class="text-xs text-sub uppercase tracking-wider"></span>
+        </div>
+        <button onclick="document.getElementById('eventModal').classList.remove('open')" class="text-sub hover:text-txt">✕</button>
+      </div>
+      <h3 id="modalTitle" class="text-xl font-bold text-txt mb-2"></h3>
+      <p id="modalDate" class="text-sm text-sub mb-1"></p>
+      <p id="modalTime" class="text-sm text-sub mb-3"></p>
+      <p id="modalDesc" class="text-sm text-txt leading-relaxed"></p>
+      <div id="modalTags" class="flex flex-wrap gap-2 mt-3"></div>
+    </div>
+  </div>
+
+  <footer class="text-center py-8 text-sub text-xs border-t border-point/10">
+    <p>© 2026 냔냐 💙</p>
+  </footer>
+
+  <script src="../js/supabase-config.js"></script>
+  <script>
+    let currentYear, currentMonth;
+    let schedules = [];
+    const DAYS = ['일','월','화','수','목','금','토'];
+    const TYPE_COLORS = { broadcast:'#6E8BFF', special:'#8B6FDD', rest:'#BFC4D6', collab:'#48BB78', other:'#ED8936' };
+    const TYPE_LABELS = { broadcast:'방송', special:'이벤트', rest:'휴방', collab:'합방', other:'기타' };
+
+    function getEventColor(ev) {
+      if (ev.is_special) return TYPE_COLORS.special;
+      const tag = (ev.tags || [])[0] || '';
+      if (tag === '휴방' || ev.title.includes('휴방')) return TYPE_COLORS.rest;
+      if (tag === '합방') return TYPE_COLORS.collab;
+      if (tag === '기타') return TYPE_COLORS.other;
+      return TYPE_COLORS.broadcast;
+    }
+    function getEventLabel(ev) {
+      if (ev.is_special) return TYPE_LABELS.special;
+      const tag = (ev.tags || [])[0] || '';
+      if (tag === '휴방' || ev.title.includes('휴방')) return TYPE_LABELS.rest;
+      return TYPE_LABELS[tag] || TYPE_LABELS.broadcast;
+    }
+
+    function init() {
+      const n = new Date();
+      currentYear = n.getFullYear();
+      currentMonth = n.getMonth();
+      loadMonth();
+    }
+
+    async function loadMonth() {
+      document.getElementById('calMonth').textContent = `${currentYear}년 ${currentMonth + 1}월`;
+      const s = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-01`;
+      const lastDay = new Date(currentYear, currentMonth+1, 0).getDate();
+      const e = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(lastDay).padStart(2,'0')}`;
+      try {
+        const sb = initSupabase();
+        const { data, error } = await sb
+          .from('schedule_events').select('*')
+          .gte('date', s).lte('date', e)
+          .eq('is_hidden', false)
+          .order('date').order('time');
+        if (error) throw error;
+        schedules = data || [];
+      } catch(err) { console.error(err); schedules = []; }
+      renderCalendar();
+      renderListView();
+      renderUpcoming();
+    }
+
+    function renderCalendar() {
+      const body = document.getElementById('calBody');
+      body.innerHTML = '';
+      const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+      const daysInMonth = new Date(currentYear, currentMonth+1, 0).getDate();
+      const today = new Date();
+
+      for (let i = 0; i < firstDay; i++) body.innerHTML += '<div class="cal-cell empty"></div>';
+
+      for (let d = 1; d <= daysInMonth; d++) {
+        const ds = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const isToday = today.getFullYear()===currentYear && today.getMonth()===currentMonth && today.getDate()===d;
+        const isPast = ds < `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+        const dayEv = schedules.filter(s => s.date === ds);
+        let evH = '';
+        dayEv.forEach(ev => {
+          const c = getEventColor(ev);
+          const hl = ev.is_special ? ' highlight' : '';
+          const t = ev.time ? ev.time.slice(0,2).replace(/^0/,'')+'시 ' : '';
+          evH += `<div class="cal-event${hl}" style="background:${c}" onclick="showEvent('${ev.id}')" title="${ev.title}">${t}${ev.title}</div>`;
+        });
+        let cls = 'cal-cell';
+        if (isToday) cls += ' today';
+        if (isPast) cls += ' past';
+        body.innerHTML += `<div class="${cls}"><div class="cal-day-num">${d}</div>${evH}</div>`;
+      }
+    }
+
+    function renderListView() {
+      const body = document.getElementById('listBody');
+      if (!body) return;
+      const daysInMonth = new Date(currentYear, currentMonth+1, 0).getDate();
+      const today = new Date();
+      const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+      const isCurrentMonth = today.getFullYear()===currentYear && today.getMonth()===currentMonth;
+      let html = ''; let todayInserted = false;
+
+      for (let d = 1; d <= daysInMonth; d++) {
+        const ds = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const dayEv = schedules.filter(s => s.date === ds);
+        if (dayEv.length === 0) continue;
+
+        const date = new Date(currentYear, currentMonth, d);
+        const dow = date.getDay();
+        const isToday = isCurrentMonth && today.getDate()===d;
+        const isPast = ds < todayStr;
+
+        if (isCurrentMonth && !todayInserted && ds >= todayStr) {
+          html += `<div class="today-divider" id="todayAnchor"><span>TODAY</span></div>`;
+          todayInserted = true;
+        }
+
+        const sundayCls = dow===0 ? ' sunday' : '';
+        const saturdayCls = dow===6 ? ' saturday' : '';
+        const todayCls = isToday ? ' today' : '';
+        let evH = '';
+        dayEv.forEach(ev => {
+          const c = getEventColor(ev);
+          const l = getEventLabel(ev);
+          const t = ev.time ? ev.time.slice(0,5) : '';
+          evH += `
+            <div class="list-event-item" onclick="showEvent('${ev.id}')">
+              <div class="list-event-bar" style="background:${c}"></div>
+              <div class="list-event-info">
+                <div class="list-event-title">${ev.title}</div>
+                ${t ? `<div class="list-event-time">${t}</div>` : ''}
+              </div>
+              <span class="list-event-badge" style="background:${c}18;color:${c}">${l}</span>
+            </div>`;
+        });
+
+        html += `
+          <div class="list-date-group${isPast ? ' past' : ''}">
+            <div class="list-date-header">
+              <div class="list-day-num${sundayCls}${saturdayCls}${todayCls}">${d}</div>
+              <div class="list-day-label">${DAYS[dow]}요일</div>
+            </div>
+            ${evH}
+          </div>`;
+      }
+
+      if (!todayInserted && isCurrentMonth) {
+        html += `<div class="today-divider" id="todayAnchor"><span>TODAY</span></div>`;
+        html += '<div class="text-center py-8 text-sub text-sm">남은 일정이 없습니다</div>';
+      }
+      if (!html) html = '<div class="text-center py-12 text-sub text-sm">이번 달 일정이 없습니다</div>';
+      body.innerHTML = html;
+      setTimeout(() => {
+        const anchor = document.getElementById('todayAnchor');
+        if (anchor) anchor.scrollIntoView({ behavior:'smooth', block:'start' });
+      }, 100);
+    }
+
+    function renderUpcoming() {
+      const list = document.getElementById('upcomingList');
+      const today = new Date();
+      const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+      const up = schedules.filter(s => s.date >= todayStr).slice(0, 5);
+      if (!up.length) { list.innerHTML = '<p class="text-sm text-sub">예정된 일정이 없습니다</p>'; return; }
+      list.innerHTML = up.map(ev => {
+        const c = getEventColor(ev);
+        const l = getEventLabel(ev);
+        const t = ev.time ? ev.time.slice(0,5) : '';
+        const dd = new Date(ev.date+'T00:00:00');
+        const ds = `${dd.getMonth()+1}/${dd.getDate()} (${DAYS[dd.getDay()]})`;
+        return `
+          <div class="flex items-center gap-4 p-4 bg-white rounded-xl border border-point/10 hover:border-point/30 transition cursor-pointer" onclick="showEvent('${ev.id}')">
+            <div class="w-1 h-10 rounded-full flex-shrink-0" style="background:${c}"></div>
+            <div class="flex-1 min-w-0">
+              <div class="font-semibold text-txt text-sm">${ev.title}</div>
+              <div class="text-xs text-sub">${ds}${t?' · '+t:''}</div>
+            </div>
+            <span class="text-xs px-2 py-1 rounded-full flex-shrink-0" style="background:${c}20;color:${c}">${l}</span>
+          </div>`;
+      }).join('');
+    }
+
+    function showEvent(id) {
+      const ev = schedules.find(s => String(s.id) === String(id));
+      if (!ev) return;
+      const c = getEventColor(ev);
+      const l = getEventLabel(ev);
+      const dd = new Date(ev.date+'T00:00:00');
+      const ds = `${currentYear}년 ${dd.getMonth()+1}월 ${dd.getDate()}일 (${DAYS[dd.getDay()]})`;
+      document.getElementById('modalColor').style.background = c;
+      document.getElementById('modalType').textContent = l;
+      document.getElementById('modalTitle').textContent = ev.title;
+      document.getElementById('modalDate').textContent = ds;
+      document.getElementById('modalTime').textContent = ev.time ? ev.time.slice(0,5) : '';
+      document.getElementById('modalDesc').textContent = ev.description || '';
+      const tagsEl = document.getElementById('modalTags');
+      tagsEl.innerHTML = (ev.tags||[]).map(t => `<span style="background:${c}18;color:${c};font-size:.75rem;padding:3px 10px;border-radius:20px;font-weight:600;">${t}</span>`).join('');
+      document.getElementById('eventModal').classList.add('open');
+    }
+
+    function closeModal(e) {
+      if (e.target === e.currentTarget) document.getElementById('eventModal').classList.remove('open');
+    }
+
+    function changeMonth(o) {
+      currentMonth += o;
+      if (currentMonth < 0) { currentMonth=11; currentYear--; }
+      if (currentMonth > 11) { currentMonth=0; currentYear++; }
+      loadMonth();
+    }
+
+    init();
+  </script>
+</body>
+</html>

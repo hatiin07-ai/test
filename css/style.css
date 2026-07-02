@@ -1,0 +1,88 @@
+/* ============================================
+   🎲 업보 숙제장 - 스타일
+   ============================================ */
+
+/* ---- Loading Spinner ---- */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.animate-spin {
+  animation: spin 0.8s linear infinite;
+}
+
+/* ---- Scrollbar ---- */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F6F8FF;
+}
+::-webkit-scrollbar-thumb {
+  background: #D6E2FF;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #AFC8FF;
+}
+
+/* ---- Action Buttons ---- */
+.btn-edit {
+  padding: 0.25rem 0.625rem;
+  font-size: 0.75rem;
+  color: #6E8BFF;
+  background: white;
+  border: 1px solid rgba(110, 139, 255, 0.3);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-edit:hover {
+  background: #EEF3FF;
+}
+.btn-delete {
+  padding: 0.25rem 0.625rem;
+  font-size: 0.75rem;
+  color: #8C8C8C;
+  background: white;
+  border: 1px solid rgba(140, 140, 140, 0.3);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-delete:hover {
+  background: #FFECEC;
+  color: #FF6B6B;
+  border-color: rgba(255, 107, 107, 0.3);
+}
+
+/* ---- Toast Notification ---- */
+.toast {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  padding: 0.75rem 1.5rem;
+  border-radius: 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: white;
+  background: #6E8BFF;
+  box-shadow: 0 4px 12px rgba(110, 139, 255, 0.3);
+  opacity: 0;
+  transition: all 0.3s ease;
+  z-index: 9999;
+}
+.toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 640px) {
+  table th, table td {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    font-size: 0.8125rem;
+  }
+}

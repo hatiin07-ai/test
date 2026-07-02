@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- 귀 -->
+  <polygon points="4,14 2,2 11,8" fill="#B8CCFF"/>
+  <polygon points="28,14 30,2 21,8" fill="#B8CCFF"/>
+  <!-- 귀 안 -->
+  <polygon points="5.5,12 4,5 10,9" fill="#E8D5FF"/>
+  <polygon points="26.5,12 28,5 22,9" fill="#E8D5FF"/>
+  <!-- 얼굴 -->
+  <circle cx="16" cy="18" r="13" fill="#FAFAFF"/>
+  <!-- 볼터치 -->
+  <ellipse cx="9.5" cy="21" rx="3.5" ry="2" fill="#FFD6EC" opacity="0.7"/>
+  <ellipse cx="22.5" cy="21" rx="3.5" ry="2" fill="#FFD6EC" opacity="0.7"/>
+  <!-- 눈 — 반달 눈 (이모지 스타일) -->
+  <path d="M10 17 Q12 14.5 14 17" fill="none" stroke="#3A3A5C" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M18 17 Q20 14.5 22 17" fill="none" stroke="#3A3A5C" stroke-width="1.8" stroke-linecap="round"/>
+  <!-- 코 -->
+  <path d="M15 20 L16 21.2 L17 20 Q16 19.2 15 20Z" fill="#C084FC"/>
+  <!-- 입 -->
+  <path d="M14 21.5 Q16 23.5 18 21.5" fill="none" stroke="#3A3A5C" stroke-width="1.2" stroke-linecap="round"/>
+  <!-- 수염 -->
+  <line x1="4" y1="20" x2="12.5" y2="20.5" stroke="#B8CCFF" stroke-width="1" stroke-linecap="round"/>
+  <line x1="4.5" y1="22.5" x2="12.5" y2="22" stroke="#B8CCFF" stroke-width="1" stroke-linecap="round"/>
+  <line x1="28" y1="20" x2="19.5" y2="20.5" stroke="#B8CCFF" stroke-width="1" stroke-linecap="round"/>
+  <line x1="27.5" y1="22.5" x2="19.5" y2="22" stroke="#B8CCFF" stroke-width="1" stroke-linecap="round"/>
+</svg>

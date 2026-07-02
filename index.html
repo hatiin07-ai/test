@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <title>냔냐 💙</title>
+  <style>
+    @font-face { font-family:'A2z'; src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2601-6@1.0/에이투지체-1Thin.woff2') format('woff2'); font-weight:100; font-display:swap; }
+    @font-face { font-family:'A2z'; src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2601-6@1.0/에이투지체-2ExtraLight.woff2') format('woff2'); font-weight:200; font-display:swap; }
+    @font-face { font-family:'A2z'; src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2601-6@1.0/에이투지체-3Light.woff2') format('woff2'); font-weight:300; font-display:swap; }
+    @font-face { font-family:'A2z'; src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2601-6@1.0/에이투지체-4Regular.woff2') format('woff2'); font-weight:400; font-display:swap; }
+    @font-face { font-family:'A2z'; src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2601-6@1.0/에이투지체-5Medium.woff2') format('woff2'); font-weight:500; font-display:swap; }
+    @font-face { font-family:'A2z'; src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2601-6@1.0/에이투지체-6SemiBold.woff2') format('woff2'); font-weight:600; font-display:swap; }
+    @font-face { font-family:'A2z'; src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2601-6@1.0/에이투지체-7Bold.woff2') format('woff2'); font-weight:700; font-display:swap; }
+    @font-face { font-family:'A2z'; src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2601-6@1.0/에이투지체-8ExtraBold.woff2') format('woff2'); font-weight:800; font-display:swap; }
+    @font-face { font-family:'A2z'; src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2601-6@1.0/에이투지체-9Black.woff2') format('woff2'); font-weight:900; font-display:swap; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --bg: #F6F8FF; --point: #AFC8FF; --accent: #6E8BFF; --accent2: #8B6FDD;
+      --txt: #2F3A5F; --sub: #7C86A5; --card-bg: #ffffff;
+      --card-border: rgba(175,200,255,0.35);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'A2z', sans-serif; background: var(--bg); color: var(--txt); overflow-x: hidden; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--point); border-radius: 3px; }
+
+    /* NAV */
+    nav {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(246,248,255,0.92); backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(175,200,255,0.2);
+    }
+    .nav-inner { max-width: 900px; margin: 0 auto; display: flex; align-items: center; justify-content: center; }
+    .nav-tab {
+      position: relative; padding: 14px 24px;
+      font-size: 0.875rem; font-weight: 500; color: var(--sub);
+      text-decoration: none; transition: color 0.25s;
+    }
+    .nav-tab::after {
+      content: ''; position: absolute; bottom: 0; left: 50%;
+      transform: translateX(-50%); width: 0; height: 2px;
+      background: var(--accent); border-radius: 1px; transition: width 0.3s;
+    }
+    .nav-tab:hover { color: var(--accent); }
+    .nav-tab:hover::after { width: 60%; }
+    .nav-tab.active { color: var(--accent); }
+    .nav-tab.active::after { width: 100%; }
+
+    /* HERO */
+    .hero {
+      max-width: 900px; margin: 0 auto;
+      padding: 40px 24px 16px;
+    }
+    .hero-avatar {
+      position: relative;
+      width: 100%; border-radius: 28px;
+      overflow: hidden;
+      border: 2px solid var(--card-border);
+      box-shadow: 0 8px 40px rgba(110,139,255,0.22);
+      margin: 0 8px;
+      width: calc(100% - 16px);
+    }
+    .hero-avatar img { width: 100%; height: auto; display: block; }
+    .hero-avatar-placeholder {
+      width: 100%; aspect-ratio: 16/7;
+      background: linear-gradient(135deg, #AFC8FF 0%, #8B6FDD 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 5rem;
+    }
+    /* 하단 그라디언트 오버레이 */
+    .hero-avatar::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(
+        to bottom,
+        transparent 35%,
+        rgba(15, 15, 35, 0.55) 70%,
+        rgba(15, 15, 35, 0.82) 100%
+      );
+      border-radius: 26px;
+    }
+    /* 이름 + 버튼 오버랩 */
+    .hero-right {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      z-index: 2;
+      padding: 28px 56px 48px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+    }
+    .hero-eyebrow {
+      font-family: 'A2z', sans-serif; font-size: 0.6875rem; font-weight: 600;
+      letter-spacing: 0.18em; color: var(--accent); text-transform: uppercase; margin-bottom: 10px;
+    }
+    .hero-name {
+      font-family: 'A2z', 'Pretendard', sans-serif;
+      font-size: clamp(3.5rem, 8vw, 6rem);
+      font-weight: 800; line-height: 0.95; letter-spacing: 0.08em;
+      display: inline-block;
+      background: linear-gradient(135deg, #ffffff 0%, #C4D8FF 50%, #A78BFA 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      filter: drop-shadow(0 2px 16px rgba(110,139,255,0.4));
+    }
+    .hero-name-grad {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .hero-sub { margin-top: 10px; font-size: 0.9375rem; color: var(--sub); }
+    .hero-pills { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 14px; }
+    .pill { font-size: 0.75rem; font-weight: 600; padding: 4px 13px; border-radius: 20px; }
+    .pill-blue   { background: #E4EDFF; color: var(--accent); }
+    .pill-purple { background: #EDE8FF; color: var(--accent2); }
+    .pill-pink   { background: #FFE8F5; color: #CC5FA0; }
+    .hero-links { display: flex; flex-direction: column; gap: 8px; align-items: flex-end; margin-top: 0; }
+    .hero-links .btn-link { width: 140px; justify-content: center; }
+    .btn-link {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 8px 18px;
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(10px);
+      color: white;
+      font-size: 0.8125rem; font-weight: 600; border-radius: 10px;
+      text-decoration: none;
+      border: 1px solid rgba(255,255,255,0.3);
+      transition: all 0.25s;
+    }
+    .btn-link:hover {
+      background: rgba(255,255,255,0.25);
+      border-color: rgba(255,255,255,0.5);
+      transform: translateY(-2px);
+    }
+
+    /* INFO CARDS (팬닉 포함 3열) */
+    .info-grid {
+      max-width: 900px; margin: 0 auto;
+      padding: 12px 24px 40px;
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+    }
+    .info-card {
+      background: var(--card-bg); border: 1px solid var(--card-border);
+      border-radius: 16px; padding: 16px; text-align: center; transition: all 0.3s;
+    }
+    .info-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(110,139,255,0.1); border-color: var(--point); }
+    .info-label { font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sub); margin-bottom: 5px; }
+    .info-value { font-size: 1rem; font-weight: 700; color: var(--txt); }
+    .info-value.accent { color: var(--accent); }
+
+    /* DIVIDER */
+    .divider { max-width: 900px; margin: 0 auto; height: 1px; background: rgba(175,200,255,0.25); }
+
+    /* SECTIONS */
+    section { max-width: 900px; margin: 0 auto; padding: 40px 24px; overflow: visible; }
+    .sec-eyebrow {
+      font-family: 'A2z', sans-serif; font-size: 0.6875rem; font-weight: 600;
+      letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-bottom: 5px;
+    }
+    .sec-title { font-size: 1.125rem; font-weight: 700; color: var(--txt); margin-bottom: 20px; }
+
+    /* PAGES 카드 (2열) */
+    .page-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .page-card {
+      background: var(--card-bg); border: 1px solid var(--card-border);
+      border-radius: 18px; padding: 22px 20px;
+      text-decoration: none; color: inherit; transition: all 0.3s;
+      display: flex; flex-direction: column; gap: 7px;
+    }
+    .page-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(110,139,255,0.14); border-color: var(--point); }
+    .pc-icon { width: 40px; height: 40px; border-radius: 11px; background: #E4EDFF; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; margin-bottom: 3px; }
+    .pc-name { font-size: 1rem; font-weight: 700; color: var(--txt); }
+    .pc-desc { font-size: 0.8125rem; color: var(--sub); line-height: 1.5; }
+    .pc-arrow { margin-top: auto; font-size: 0.8125rem; font-weight: 600; color: var(--accent); }
+
+    /* UPCOMING SCHEDULE 가로 스크롤 */
+    .schedule-strip-wrap { margin-top: 28px; padding-top: 8px; }
+    .schedule-strip {
+      display: flex; gap: 11px;
+      overflow-x: auto; padding: 8px 2px 4px;
+      scrollbar-width: none;
+    }
+    .schedule-strip::-webkit-scrollbar { display: none; }
+    .sch-card {
+      flex-shrink: 0; width: 160px;
+      background: var(--card-bg); border: 1px solid var(--card-border);
+      border-radius: 16px; padding: 16px 14px;
+      transition: all 0.3s;
+    }
+    .sch-card:hover { transform: translateY(-3px); border-color: var(--point); box-shadow: 0 6px 20px rgba(110,139,255,0.12); }
+    .sch-card.is-today { border-color: var(--accent); background: #F0F4FF; }
+    .sch-date-top { display: flex; align-items: baseline; gap: 5px; margin-bottom: 10px; }
+    .sch-month { font-size: 0.6875rem; font-weight: 600; color: var(--sub); text-transform: uppercase; }
+    .sch-day-num { font-family: 'A2z', sans-serif; font-size: 1.5rem; font-weight: 700; color: var(--accent); line-height: 1; }
+    .sch-weekday { font-size: 0.6875rem; color: var(--sub); margin-bottom: 7px; }
+    .sch-title { font-size: 0.8125rem; font-weight: 600; color: var(--txt); line-height: 1.35; margin-bottom: 6px; }
+    .sch-time { font-size: 0.6875rem; color: var(--sub); }
+    .sch-badge {
+      display: inline-block; margin-top: 6px;
+      font-size: 0.625rem; font-weight: 600;
+      padding: 2px 8px; border-radius: 20px;
+      background: #E4EDFF; color: var(--accent);
+    }
+    .sch-badge.special { background: #EDE8FF; color: var(--accent2); }
+    .sch-empty {
+      text-align: center; padding: 32px 16px;
+      color: var(--sub); font-size: 0.875rem;
+      background: var(--card-bg); border: 1px dashed var(--card-border);
+      border-radius: 16px;
+    }
+    .sch-loading {
+      display: flex; align-items: center; gap: 10px;
+      padding: 24px 0; color: var(--sub); font-size: 0.8125rem;
+    }
+    .spinner { width: 18px; height: 18px; border: 2px solid var(--point); border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* FADE UP */
+    .fade-up { opacity: 0; transform: translateY(20px); transition: opacity 0.55s ease, transform 0.55s ease; }
+    .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+    /* FOOTER */
+    footer { text-align: center; padding: 28px 24px; color: var(--sub); font-size: 0.75rem; border-top: 1px solid rgba(175,200,255,0.2); }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .hero { padding: 24px 20px 0; }
+      .hero-right { padding: 20px 44px 15px; }
+      .hero-name { font-size: clamp(2.5rem, 12vw, 4rem); }
+      .info-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 16px 20px 32px; }
+      .info-value { font-size: 0.875rem; }
+      .page-cards { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .nav-tab { padding: 12px 14px; font-size: 0.8125rem; }
+      .sch-card { width: 140px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="nav-inner">
+      <a href="/" class="nav-tab active">프로필</a>
+      <a href="/schedule/" class="nav-tab">일정</a>
+      <a href="/upbo/" class="nav-tab">업보책</a>
+      <a href="https://www.songstudio.live/songbook/platform/@%EB%83%94%EB%83%90_" target="_blank" rel="noopener" class="nav-tab">노래책</a>
+      <a href="https://weflab.com/user/lOPU2sualmZsZw" target="_blank" rel="noopener" class="nav-tab">룰렛확률</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero fade-up">
+    <div class="hero-avatar">
+      <img src="assets/images/profile.jpg" alt="냔냐"
+        onerror="this.parentElement.innerHTML='<div class=\'hero-avatar-placeholder\'>🐱</div>'">
+    </div>
+    <div class="hero-right">
+      <div class="hero-name">냔냐</div>
+      <div class="hero-links">
+        <a href="https://www.youtube.com/@냔냐66" target="_blank" rel="noopener" class="btn-link">
+          <svg width="16" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+          유튜브
+        </a>
+        <a href="https://cafe.naver.com/nyanya486" target="_blank" rel="noopener" class="btn-link">
+          ☕ 네이버카페
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- INFO CARDS 6칸 3열 -->
+  <div class="info-grid fade-up">
+    <div class="info-card">
+      <div class="info-label">나이</div>
+      <div class="info-value">영원한 20살</div>
+    </div>
+    <div class="info-card">
+      <div class="info-label">생일</div>
+      <div class="info-value">6월 10일</div>
+    </div>
+    <div class="info-card">
+      <div class="info-label">MBTI</div>
+      <div class="info-value">INTP / ISTP</div>
+    </div>
+    <div class="info-card">
+      <div class="info-label">평일</div>
+      <div class="info-value accent">19:00</div>
+    </div>
+    <div class="info-card">
+      <div class="info-label">주말</div>
+      <div class="info-value accent">14:00</div>
+    </div>
+    <div class="info-card">
+      <div class="info-label">휴방</div>
+      <div class="info-value">월 · 목 🌙</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- PAGES 둘러보기 -->
+  <section class="fade-up">
+    <div class="sec-eyebrow">Pages</div>
+    <div class="sec-title">둘러보기</div>
+    <div class="page-cards">
+      <a href="/schedule/" class="page-card">
+        <div class="pc-icon">📅</div>
+        <div class="pc-name">스케줄</div>
+        <div class="pc-desc">다가오는 방송 일정과 휴방 정보를 확인해요.</div>
+        <div class="pc-arrow">→ 바로가기</div>
+      </a>
+      <a href="/upbo/" class="page-card">
+        <div class="pc-icon">📋</div>
+        <div class="pc-name">업보책</div>
+        <div class="pc-desc">멈무들의 업보 숙제 목록을 모아봤어요.</div>
+        <div class="pc-arrow">→ 바로가기</div>
+      </a>
+      <a href="https://www.songstudio.live/songbook/platform/@%EB%83%94%EB%83%90_" target="_blank" rel="noopener" class="page-card">
+        <div class="pc-icon">🎵</div>
+        <div class="pc-name">노래책</div>
+        <div class="pc-desc">냔냐가 부를 수 있는 노래 목록을 확인해요.</div>
+        <div class="pc-arrow">→ 바로가기</div>
+      </a>
+      <a href="https://weflab.com/user/lOPU2sualmZsZw" target="_blank" rel="noopener" class="page-card">
+        <div class="pc-icon">🎲</div>
+        <div class="pc-name">룰렛 확률</div>
+        <div class="pc-desc">룰렛 항목별 확률을 확인할 수 있어요.</div>
+        <div class="pc-arrow">→ 바로가기</div>
+      </a>
+    </div>
+
+    <!-- 앞으로 5개 일정 가로 스크롤 -->
+    <div class="schedule-strip-wrap">
+      <div id="scheduleStrip" class="schedule-strip">
+        <div class="sch-loading">
+          <div class="spinner"></div>
+          <span>일정 불러오는 중...</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <div class="divider"></div>
+
+  <section class="fade-up">
+    <div class="sec-eyebrow">Highlight</div>
+    <div class="sec-title">노래 클립 🎤</div>
+    <div style="position:relative; width:100%; aspect-ratio:16/9; border-radius:16px; overflow:hidden; box-shadow:0 8px 32px rgba(110,139,255,0.15);">
+      <iframe
+        src="https://vod.sooplive.com/player/193654153/embed?showChat=false&autoPlay=false&mutePlay=true"
+        style="position:absolute; inset:0; width:100%; height:100%; border:none;"
+        allowfullscreen="true" allow="clipboard-write; web-share;"></iframe>
+    </div>
+  </section>
+
+  <footer>
+    <p>© 2026 냔냐 💙 · <a href="https://cafe.naver.com/nyanya486" target="_blank" style="color:var(--accent);text-decoration:none;">네이버카페</a></p>
+  </footer>
+
+  <script src="js/supabase-config.js"></script>
+  <script>
+    // fade-up
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.06, rootMargin: '0px 0px -30px 0px' });
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+    // 앞으로 5개 일정
+    const WEEKDAYS = ['일','월','화','수','목','금','토'];
+    const MONTHS_EN = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+
+    async function loadUpcomingStrip() {
+      const strip = document.getElementById('scheduleStrip');
+      try {
+        const sb = initSupabase();
+        const today = new Date().toISOString().slice(0, 10);
+        const { data, error } = await sb
+          .from('schedule_events')
+          .select('*')
+          .gte('date', today)
+          .eq('is_hidden', false)
+          .order('date', { ascending: true })
+          .order('time', { ascending: true })
+          .limit(5);
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+          strip.innerHTML = '<div class="sch-empty">📭 예정된 일정이 없어요</div>';
+          return;
+        }
+
+        strip.innerHTML = data.map(ev => {
+          const d = new Date(ev.date + 'T00:00:00');
+          const isToday = ev.date === today;
+          const month = MONTHS_EN[d.getMonth()];
+          const dayNum = d.getDate();
+          const weekday = WEEKDAYS[d.getDay()] + '요일';
+          const timeStr = ev.time ? ev.time.slice(0, 5) : '';
+          const badge = ev.is_special
+            ? `<span class="sch-badge special">이벤트</span>`
+            : `<span class="sch-badge">방송</span>`;
+          return `
+            <div class="sch-card${isToday ? ' is-today' : ''}">
+              <div class="sch-date-top">
+                <span class="sch-month">${month}</span>
+                <span class="sch-day-num">${dayNum}</span>
+              </div>
+              <div class="sch-weekday">${weekday}${isToday ? ' · 오늘' : ''}</div>
+              <div class="sch-title">${ev.title}</div>
+              ${timeStr ? `<div class="sch-time">${timeStr}</div>` : ''}
+              ${badge}
+            </div>`;
+        }).join('');
+      } catch (err) {
+        console.error(err);
+        strip.innerHTML = '<div class="sch-empty">일정을 불러오지 못했어요</div>';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadUpcomingStrip);
+  </script>
+</body>
+</html>
