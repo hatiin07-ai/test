@@ -96,6 +96,8 @@
         <button class="tab-btn pb-3 text-sm whitespace-nowrap" data-tab="types">⚙️ 항목 관리</button>
         <button class="tab-btn pb-3 text-sm whitespace-nowrap" data-tab="seasons">🗂️ 시즌 관리</button>
         <button class="tab-btn pb-3 text-sm whitespace-nowrap" data-tab="wefgen">🎰 룰렛 연동</button>
+        <button class="tab-btn pb-3 text-sm whitespace-nowrap relative" data-tab="wefpending">📥 입력 확인
+          <span id="wpBadge" class="hidden absolute -top-1 -right-3 bg-red-500 text-white text-[10px] rounded-full px-1.5 py-0.5">0</span></button>
         <button class="tab-btn pb-3 text-sm whitespace-nowrap" data-tab="inquiries">
           ✉️ 문의
           <span id="inquiryBadge" class="hidden ml-1 px-1.5 py-0.5 text-[10px] bg-accent text-white rounded-full">0</span>
@@ -361,6 +363,23 @@
         </div>
       </div>
 
+      <!-- ========== 입력 확인 (staging 검토) ========== -->
+      <div id="tab-wefpending" class="tab-content">
+        <div class="bg-white rounded-2xl shadow-sm border border-point/20 p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="font-semibold text-txt">📥 입력 대기 <span class="text-sm text-sub">(<span id="wpCount">0</span>개)</span></h2>
+            <div class="flex gap-2">
+              <button onclick="wpLoad()" class="px-4 py-2 rounded-xl border border-point/30 text-sm text-txt hover:bg-bg transition-colors">새로고침</button>
+              <button onclick="wpDelete()" class="px-4 py-2 rounded-xl border border-red-300 text-red-500 text-sm hover:bg-red-50 transition-colors">선택 삭제</button>
+              <button onclick="wpApprove()" class="px-6 py-2 rounded-xl bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition-colors">선택 승인 → 기입</button>
+            </div>
+          </div>
+          <p class="text-xs text-sub mb-4">북마클릿으로 크롤된 결과가 여기 쌓입니다. 체크·수량 확인 후 <b>승인</b>하면 숙제로 반영됩니다. 필요 없으면 <b>삭제</b>.</p>
+          <div id="wpList"><p class="text-sub text-sm">새로고침을 누르거나 탭을 다시 열면 목록이 로드됩니다.</p></div>
+          <p id="wpStatus" class="text-sm mt-2"></p>
+        </div>
+      </div>
+
       <!-- ========== 문의 관리 ========== -->
       <div id="tab-inquiries" class="tab-content">
         <div class="bg-white rounded-2xl shadow-sm border border-point/20 p-6">
@@ -456,6 +475,7 @@
   <script src="../js/upbo-admin.js"></script>
   <script src="../js/schedule-admin.js"></script>
   <script src="../js/wef-generator.js"></script>
+  <script src="../js/wef-pending.js"></script>
   <script>
     // 탭 전환 + 스케줄 탭 추가 연동
     document.addEventListener('DOMContentLoaded', () => {
