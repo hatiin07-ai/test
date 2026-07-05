@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (addSeasonForm) addSeasonForm.addEventListener('submit', handleAddSeason);
 
   // 시청자 선택 변경
-  document.getElementById('seasonSelect').addEventListener('change', handleMemberSelect);
+  document.getElementById('seasonSelect').addEventListener('change', onSeasonChange);
 
   // 시청자 검색창 이벤트
   const searchInput = document.getElementById('memberSearchInput');
@@ -158,6 +158,7 @@ async function loadAdminData() {
   renderTypeTable();
   await loadInquiries();
   await loadSeasons();     // 시즌 데이터 먼저
+  renderMemberSelect();    // 활성 시즌 기준으로 숙제 개수 정렬 재적용
   renderOverview();        // 시즌 데이터 있는 상태에서 렌더
 
   // 스케줄 탭도 함께 로드
@@ -207,13 +208,40 @@ async function updateDate() {
 // 시청자 관리
 // ============================================
 
+// 특정 시즌에서 시청자의 숙제 총량 (수량 합)
+function memberTaskCount(memberId, seasonId) {
+  return allTasks
+    .filter(t => String(t.member_id) === String(memberId) &&
+                 (seasonId ? t.season_id === seasonId : !t.season_id) &&
+                 t.quantity > 0)
+    .reduce((s, t) => s + t.quantity, 0);
+}
+
 function renderMemberSelect() {
   const select = document.getElementById('memberSelect');
+  const seasonId = document.getElementById('seasonSelect')?.value || null;
+  const withCount = allMembers.map(m => ({ m, cnt: memberTaskCount(m.id, seasonId) }));
+  // 숙제 있는 사람 먼저 → 개수 많은 순 → 닉네임
+  withCount.sort((a, b) => {
+    if ((b.cnt > 0) !== (a.cnt > 0)) return (b.cnt > 0) - (a.cnt > 0);
+    if (b.cnt !== a.cnt) return b.cnt - a.cnt;
+    return (a.m.nickname || '').localeCompare(b.m.nickname || '');
+  });
   select.innerHTML = '<option value="">-- 시청자 선택 --</option>' +
-    allMembers.map(m => {
+    withCount.map(({ m, cnt }) => {
       const hidden = m.is_hidden ? ' [숨김]' : '';
-      return `<option value="${m.id}">${escapeHtml(m.nickname)} (${escapeHtml(m.user_id)})${hidden}</option>`;
+      const badge = cnt > 0 ? ` · 숙제 ${cnt}` : '';
+      return `<option value="${m.id}">${escapeHtml(m.nickname)} (${escapeHtml(m.user_id)})${badge}${hidden}</option>`;
     }).join('');
+}
+
+// 시즌 변경 시: 드롭다운 재정렬(선택 유지) 후 숙제 렌더
+function onSeasonChange() {
+  const sel = document.getElementById('memberSelect');
+  const cur = sel.value;
+  renderMemberSelect();
+  sel.value = cur;
+  handleMemberSelect();
 }
 
 let _memberListIdx = -1;
