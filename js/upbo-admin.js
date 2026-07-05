@@ -379,14 +379,17 @@ async function deleteMember(id) {
 function handleMemberSelect() {
   const memberId = document.getElementById('memberSelect').value;
   const taskGrid = document.getElementById('taskGrid');
+  const assignBtns = document.getElementById('assignBtns');
 
   if (!memberId) {
     taskGrid.classList.add('hidden');
+    if (assignBtns) assignBtns.style.display = 'none';
     document.getElementById('assignMemo').value = '';
     return;
   }
 
   taskGrid.classList.remove('hidden');
+  if (assignBtns) assignBtns.style.display = 'flex';
   renderTaskCheckboxes(memberId);
 
   // 해당 시청자 메모 불러오기
@@ -396,17 +399,21 @@ function handleMemberSelect() {
 
 function renderTaskCheckboxes(memberId) {
   const container = document.getElementById('taskCheckboxes');
-  const activeTypes = allTaskTypes.filter(t => t.is_active)
-    .sort((a, b) => {
-      // 카테고리(고정 먼저) → sort_order 순
-      if (a.category !== b.category) return a.category === 'regular' ? -1 : 1;
-      return (a.sort_order || 0) - (b.sort_order || 0);
-    });
   const seasonId = document.getElementById('seasonSelect')?.value || null;
   const memberTasks = allTasks.filter(t =>
     String(t.member_id) === String(memberId) &&
     (seasonId ? t.season_id === seasonId : !t.season_id)
   );
+  const qtyOf = (id) => { const e = memberTasks.find(t => t.task_type_id === id); return e ? e.quantity : 0; };
+  const activeTypes = allTaskTypes.filter(t => t.is_active)
+    .sort((a, b) => {
+      // 보유중(수량>0) 먼저 → 카테고리(고정 먼저) → sort_order 순
+      const ca = qtyOf(a.id) > 0 ? 0 : 1;
+      const cb = qtyOf(b.id) > 0 ? 0 : 1;
+      if (ca !== cb) return ca - cb;
+      if (a.category !== b.category) return a.category === 'regular' ? -1 : 1;
+      return (a.sort_order || 0) - (b.sort_order || 0);
+    });
 
   container.innerHTML = activeTypes.map(type => {
     const existing = memberTasks.find(t => t.task_type_id === type.id);
